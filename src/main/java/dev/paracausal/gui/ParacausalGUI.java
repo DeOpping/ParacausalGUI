@@ -16,7 +16,6 @@ public class ParacausalGUI {
         serverVersion = Integer.parseInt(plugin.getServer().getVersion().split("\\.")[1]);
         placeholderApi = plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
         headDatabase = plugin.getServer().getPluginManager().getPlugin("HeadDatabase") != null;
-        advancedHeads = plugin.getServer().getPluginManager().getPlugin("AdvancedHeads") != null;
     }
 
     /**

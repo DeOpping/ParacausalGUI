@@ -5,7 +5,6 @@ import com.cryptomorin.xseries.XEnchantment;
 import com.cryptomorin.xseries.XMaterial;
 import de.tr7zw.nbtapi.NBTItem;
 import me.arcaniax.hdb.api.HeadDatabaseAPI;
-import net.advancedplugins.heads.api.AdvancedHeadsAPI;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -54,11 +53,6 @@ public class ItemUtils {
         if (headDatabase && material.startsWith("hdb-")) {
             String id = StringUtils.substringAfter(material, "-");
             return new HeadDatabaseAPI().getItemHead(id);
-        }
-
-        if (advancedHeads && material.startsWith("ahd-")) {
-            String id = StringUtils.substringAfter(material, "-");
-            return AdvancedHeadsAPI.getHeadFromId(toInt(id));
         }
 
         Material mat;
