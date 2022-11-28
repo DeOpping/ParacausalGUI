@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'maven-publish'
 }
 
 group 'dev.paracausal'
@@ -28,8 +29,16 @@ dependencies {
 
 shadowJar {
     minimize()
-    relocate 'de.tr7zw.changeme.nbtapi', 'dev.paracausal.gui.nbtapi'
+    relocate 'de.tr7zw.nbtapi', 'dev.paracausal.gui.nbtapi'
     relocate 'com.cryptomorin.xseries', 'dev.paracausal.gui.xseries'
 }
 
 assemble.dependsOn shadowJar
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
