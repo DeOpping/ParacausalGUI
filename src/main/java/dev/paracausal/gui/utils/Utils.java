@@ -1,44 +1,40 @@
 package dev.paracausal.gui.utils;
 
-import dev.paracausal.gui.Plugin;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static dev.paracausal.gui.ParacausalGUI.*;
+
 public class Utils {
 
-    private final Plugin plugin;
 
-    public Utils(Plugin plugin) {
-        this.plugin = plugin;
-    }
-
-
-    public static ArrayList<String> toList(ConfigUtils config, String path) {
-        Object o = config.getConfig().get(path);
+    public static ArrayList<String> toList(FileConfiguration config, String path) {
+        Object o = config.get(path);
         ArrayList<String> list = new ArrayList<>();
 
         if (o instanceof String) list.add(o.toString());
-        else list = new ArrayList<>(config.getConfig().getStringList(path));
+        else list = new ArrayList<>(config.getStringList(path));
 
         return list;
     }
 
 
-    public static ArrayList<String> getKeys(ConfigUtils config, String path) {
-        return new ArrayList<>(config.getConfig().getConfigurationSection(path).getKeys(false));
+    public static ArrayList<String> getKeys(FileConfiguration config, String path) {
+        return new ArrayList<>(config.getConfigurationSection(path).getKeys(false));
     }
 
 
 
-    private Object checkMiniMessage(String input, Player player) {
+    private static Object checkMiniMessage(String input, Player player) {
         boolean mini = false;
         if (input.startsWith("<mini> ")) {
             input = input.replaceFirst("<mini> ", "");
@@ -49,16 +45,16 @@ public class Utils {
         else return input;
     }
 
-    private Component miniMessage(String input, Player player) {
-        if (plugin.placeholderApi && player != null) input = PlaceholderAPI.setPlaceholders(player, input);
+    private static Component miniMessage(String input, Player player) {
+        if (placeholderApi && player != null) input = PlaceholderAPI.setPlaceholders(player, input);
         MiniMessage mm = MiniMessage.miniMessage();
         return mm.deserialize(input);
     }
 
-    public String color(String input, Player player) {
-        if (plugin.placeholderApi && player != null) input = PlaceholderAPI.setPlaceholders(player, input);
+    public static String color(String input, Player player) {
+        if (placeholderApi && player != null) input = PlaceholderAPI.setPlaceholders(player, input);
 
-        if (plugin.serverVersion >= 16) {
+        if (serverVersion >= 16) {
             Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
             Matcher matcher = pattern.matcher(input);
 
@@ -79,17 +75,17 @@ public class Utils {
         return ChatColor.translateAlternateColorCodes('&', input);
     }
 
-    private void send(Player player, String input) {
-        Object message = this.checkMiniMessage(input, player);
+    private static void send(Player player, String input) {
+        Object message = checkMiniMessage(input, player);
         if (message instanceof Component) {
             Audience audience = (Audience) player;
             audience.sendMessage((Component) message);
         }
 
-        else player.sendMessage(this.color(input, player));
+        else player.sendMessage(color(input, player));
     }
 
-    public void sendMessage(Player player, String input) {
+    public static void sendMessage(Player player, String input) {
         if (input == null || input.length() == 0) return;
         send(player, input);
     }

@@ -4,11 +4,11 @@ import com.cryptomorin.xseries.SkullUtils;
 import com.cryptomorin.xseries.XEnchantment;
 import com.cryptomorin.xseries.XMaterial;
 import de.tr7zw.nbtapi.NBTItem;
-import dev.paracausal.gui.Plugin;
 import me.arcaniax.hdb.api.HeadDatabaseAPI;
 import net.advancedplugins.heads.api.AdvancedHeadsAPI;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -19,25 +19,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static dev.paracausal.gui.ParacausalGUI.*;
 import static dev.paracausal.gui.utils.NumberUtils.toInt;
+import static dev.paracausal.gui.utils.Utils.color;
+import static dev.paracausal.gui.utils.Utils.toList;
 
 
 public class ItemUtils {
 
-    private final Plugin plugin;
-    private final Utils utils;
-    private Player player = null;
-
-    public ItemUtils(Plugin plugin) {
-        this.plugin = plugin;
-        this.utils = plugin.getUtils();
-    }
-
-    public void setPlayer(Player player) { this.player = player; }
+    private static FileConfiguration config = null;
+    private static Player player = null;
 
 
-    public ItemStack checkMaterial(ConfigUtils config, String path) {
-        String material = config.getConfig().getString(path + ".material");
+    public static void itemUtilsConfig(FileConfiguration config) { ItemUtils.config = config; }
+    public static void itemUtilsPlayer(Player player) { ItemUtils.player = player; }
+
+
+    public static ItemStack checkMaterial(String path) {
+        String materialPath = path + ".material";
+        String material = config.getString(materialPath);
         ItemStack item;
 
         if (material.startsWith("head-")) {
@@ -51,12 +51,12 @@ public class ItemUtils {
             return item;
         }
 
-        if (plugin.headDatabase && material.startsWith("hdb-")) {
+        if (headDatabase && material.startsWith("hdb-")) {
             String id = StringUtils.substringAfter(material, "-");
             return new HeadDatabaseAPI().getItemHead(id);
         }
 
-        if (plugin.advancedHeads && material.startsWith("ahd-")) {
+        if (advancedHeads && material.startsWith("ahd-")) {
             String id = StringUtils.substringAfter(material, "-");
             return AdvancedHeadsAPI.getHeadFromId(toInt(id));
         }
@@ -67,8 +67,8 @@ public class ItemUtils {
 
         item = new ItemStack(mat);
 
-        if (plugin.serverVersion < 13 && config.getConfig().contains(path + ".data")) {
-            int data = config.getConfig().getInt(path + ".data");
+        if (serverVersion < 13 && config.contains(path + ".data")) {
+            int data = config.getInt(path + ".data");
             item = new ItemStack(mat, 1, (short) 0, (byte) data);
         }
 
@@ -76,7 +76,7 @@ public class ItemUtils {
     }
 
 
-    public ItemStack addNBT(ItemStack item, String key, String value) {
+    public static ItemStack addNBT(ItemStack item, String key, String value) {
         NBTItem nbtItem = new NBTItem(item);
         nbtItem.setString(key, value);
 
@@ -85,16 +85,16 @@ public class ItemUtils {
     }
 
 
-    public ItemMeta addLore(ItemMeta meta, ConfigUtils config, String path) {
+    public static ItemMeta addLore(ItemMeta meta, String path) {
         List<String> formatted = new ArrayList<>();
-        utils.toList(config, path).forEach(string -> formatted.add(utils.color(string, player)));
+        toList(config, path).forEach(string -> formatted.add(color(string, player)));
         meta.setLore(formatted);
         return meta;
     }
 
 
-    public ItemMeta addEnchants(ItemMeta meta, ConfigUtils config, String path) {
-        utils.toList(config, path).forEach(string -> {
+    public static ItemMeta addEnchants(ItemMeta meta, String path) {
+        toList(config, path).forEach(string -> {
             String enchant = string;
             int level = 1;
             boolean restrict = false;
@@ -117,8 +117,8 @@ public class ItemUtils {
         return meta;
     }
 
-    public ItemMeta addItemFlags(ItemMeta meta, ConfigUtils config, String path) {
-        utils.toList(config, path).forEach(string -> {
+    public static ItemMeta addItemFlags(ItemMeta meta, String path) {
+        toList(config, path).forEach(string -> {
             ItemFlag flag;
             try { flag = ItemFlag.valueOf(string); }
             catch (IllegalArgumentException exception) { return; }
@@ -130,34 +130,34 @@ public class ItemUtils {
     }
 
 
-    public ItemStack createItem(ConfigUtils config, String path) {
-        ItemStack item = checkMaterial(config, path);
+    public static ItemStack createItem(String path) {
+        ItemStack item = checkMaterial(path);
         ItemMeta meta = item.getItemMeta();
 
-        if (config.getConfig().contains(path + ".name"))
-            meta.setDisplayName(utils.color(config.getConfig().getString(path + ".name"), player));
+        if (config.contains(path + ".name"))
+            meta.setDisplayName(color(config.getString(path + ".name"), player));
 
-        if (config.getConfig().contains(path + ".lore"))
-            meta = addLore(meta, config, path + ".lore");
+        if (config.contains(path + ".lore"))
+            meta = addLore(meta, path + ".lore");
 
-        if (config.getConfig().contains(path + ".enchants"))
-            meta = addEnchants(meta, config, path + ".enchants");
+        if (config.contains(path + ".enchants"))
+            meta = addEnchants(meta, path + ".enchants");
 
-        if (config.getConfig().contains(path + "item-flags"))
-            meta = addItemFlags(meta, config, path + "item-flags");
+        if (config.contains(path + "item-flags"))
+            meta = addItemFlags(meta, path + "item-flags");
 
-        if (plugin.serverVersion >= 14 && config.getConfig().contains(path + ".model-data"))
-            meta.setCustomModelData(config.getConfig().getInt(path + ".model-data"));
+        if (serverVersion >= 14 && config.contains(path + ".model-data"))
+            meta.setCustomModelData(config.getInt(path + ".model-data"));
 
         item.setItemMeta(meta);
 
-        this.player = null;
+        player = null;
         return item;
     }
 
 
-    public ArrayList<Integer> slots(ConfigUtils config, String path) {
-        Object o = config.getConfig().get(path + ".slots");
+    public static ArrayList<Integer> slots(FileConfiguration config, String path) {
+        Object o = config.get(path + ".slots");
 
         ArrayList<String> first = new ArrayList<>();
         ArrayList<Integer> second = new ArrayList<>();
@@ -169,7 +169,7 @@ public class ItemUtils {
 
         else if (o instanceof Integer) second.add((int) o);
 
-        else first = utils.toList(config, path + ".slots");
+        else first = toList(config, path + ".slots");
 
 
         first.forEach(input -> {

@@ -1,7 +1,5 @@
 plugins {
     id 'java'
-    id 'maven-publish'
-    id 'net.minecrell.plugin-yml.bukkit' version '0.5.2'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
@@ -28,13 +26,6 @@ dependencies {
     compileOnly files('libs/AdvancedHeads-1.0.8.jar')
 }
 
-bukkit {
-    main = "dev.paracausal.gui.Plugin"
-    apiVersion = "1.13"
-    authors = ['Mantice']
-    softDepend = ['NBTAPI', 'PlaceholderAPI', 'HeadDatabase', 'AdvancedHeads']
-}
-
 shadowJar {
     minimize()
     relocate 'de.tr7zw.changeme.nbtapi', 'dev.paracausal.gui.nbtapi'
@@ -42,11 +33,3 @@ shadowJar {
 }
 
 assemble.dependsOn shadowJar
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
-        }
-    }
-}

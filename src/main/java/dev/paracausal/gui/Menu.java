@@ -1,8 +1,8 @@
 package dev.paracausal.gui;
 
 import de.tr7zw.nbtapi.NBTItem;
-import dev.paracausal.gui.utils.ConfigUtils;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,33 +17,30 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static dev.paracausal.gui.Commands.*;
+import static dev.paracausal.gui.ParacausalGUI.getPlugin;
+import static dev.paracausal.gui.utils.ItemUtils.itemUtilsConfig;
+import static dev.paracausal.gui.utils.ItemUtils.itemUtilsPlayer;
+
 public class Menu implements Listener {
 
     public static HashMap<UUID, String> currentMenuMap = new HashMap<>();
     public static HashMap<UUID, Inventory> currentInventoryMap = new HashMap<>();
     public static HashMap<UUID, Integer> currentPageMap = new HashMap<>();
 
-    private ConfigUtils config;
-
-    private Creator creator;
-    private Commands commands;
+    private static FileConfiguration config;
 
 
-    public Menu(Plugin plugin) {
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
-    }
-
-    public Menu(Plugin plugin, ConfigUtils config) {
-        this.config = config;
-
-        this.creator = new Creator(plugin);
-        this.commands = new Commands(plugin);
+    public Menu() {
+        getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
     }
 
 
-
-    public void openInventory(String menu, Player player) {
-        creator.openInventory(config, menu, player);
+    public static void openInventory(FileConfiguration config, String menu, Player player) {
+        Menu.config = config;
+        itemUtilsConfig(config);
+        itemUtilsPlayer(player);
+        Creator.openInventory(config, menu, player);
     }
 
 
@@ -90,7 +87,11 @@ public class Menu implements Listener {
         NBTItem nbt = new NBTItem(item);
         String path = nbt.getString("key");
 
-        commands.execute(config, path, clickType, player);
+        commandsConfig(config);
+        commandsPath(path);
+        commandsClickType(clickType);
+
+        execute(player);
     }
 
 }

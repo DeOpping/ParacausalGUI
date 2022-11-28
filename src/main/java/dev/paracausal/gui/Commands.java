@@ -1,35 +1,40 @@
 package dev.paracausal.gui;
 
-import dev.paracausal.gui.utils.ConfigUtils;
-import dev.paracausal.gui.utils.Utils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.paracausal.gui.utils.Utils.getKeys;
+import static dev.paracausal.gui.utils.Utils.*;
 
 public class Commands {
 
-    private final Utils utils;
+    private static FileConfiguration config;
+    private static String path;
+    private static ClickType clickType;
 
-    private ConfigUtils config;
-    private String path;
-    private ClickType clickType;
-
-    public Commands(Plugin plugin) {
-        this.utils = plugin.getUtils();
+    protected static void commandsConfig(FileConfiguration config) {
+        Commands.config = config;
     }
 
-    private ArrayList<String> allCommands() {
-        return getKeys(config, path + ".commands");
+    protected static void commandsPath(String path) {
+        Commands.path = path + ".commands";
     }
 
-    private List<String> activeCommands() {
+    protected static void commandsClickType(ClickType clickType) {
+        Commands.clickType = clickType;
+    }
+
+    private static ArrayList<String> allCommands() {
+        return toList(config, path);
+    }
+
+    private static List<String> activeCommands() {
         ArrayList<String> filtered = new ArrayList<>();
 
         allCommands().forEach(string -> {
@@ -48,11 +53,7 @@ public class Commands {
         return filtered;
     }
 
-    public void execute(ConfigUtils config, String path, ClickType clickType, Player player) {
-        this.config = config;
-        this.path = path + ".commands";
-        this.clickType = clickType;
-
+    public static void execute(Player player) {
         activeCommands().forEach(command -> {
             String lower = command.toLowerCase();
 
@@ -61,14 +62,14 @@ public class Commands {
                 if (msg.startsWith(" ")) msg = msg.replaceFirst(" ", "");
 
                 String message = msg;
-                Bukkit.getOnlinePlayers().forEach(p -> utils.sendMessage(p, message));
+                Bukkit.getOnlinePlayers().forEach(p -> sendMessage(p, message));
                 return;
             }
 
             if (lower.startsWith("[message]")) {
                 String msg = StringUtils.substringAfter(command, "]");
                 if (msg.startsWith(" ")) msg = msg.replaceFirst(" ", "");
-                utils.sendMessage(player, msg);
+                sendMessage(player, msg);
                 return;
             }
 

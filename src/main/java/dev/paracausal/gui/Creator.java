@@ -1,9 +1,7 @@
 package dev.paracausal.gui;
 
-import dev.paracausal.gui.utils.ConfigUtils;
-import dev.paracausal.gui.utils.ItemUtils;
-import dev.paracausal.gui.utils.Utils;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -11,51 +9,43 @@ import org.bukkit.inventory.ItemStack;
 import java.util.UUID;
 
 import static dev.paracausal.gui.Menu.*;
+import static dev.paracausal.gui.utils.ItemUtils.*;
+import static dev.paracausal.gui.utils.Utils.color;
 
 public class Creator {
 
-    private final Utils utils;
-    private final ItemUtils itemUtils;
+    private static FileConfiguration config;
+    private static String menu;
+    private static Inventory inventory;
+    private static Player player;
 
 
-    private ConfigUtils config;
-    private String menu;
-    private Inventory inventory;
-    private Player player;
+    public static void openInventory(FileConfiguration config, String menu, Player player) {
+        Creator.config = config;
+        Creator.menu = menu;
+        Creator.player = player;
 
+        int rows = config.getInt("rows");
+        String title = config.getString("title");
+        Inventory inv = Bukkit.createInventory(null, rows*9, color(title, player));
 
-    public Creator(Plugin plugin) {
-        this.utils = plugin.getUtils();
-        this.itemUtils = plugin.getItemUtils();
-    }
-
-
-    public void openInventory(ConfigUtils config, String menu, Player player) {
-        this.config = config;
-        this.menu = menu;
-        this.player = player;
-
-        int rows = config.getConfig().getInt("rows");
-        String title = config.getConfig().getString("title");
-        Inventory inv = Bukkit.createInventory(null, rows*9, utils.color(title, player));
-
-        boolean paginate = config.getConfig().contains("paginated");
+        boolean paginate = config.contains("paginated");
 
         UUID uuid = player.getUniqueId();
         currentMenuMap.put(uuid, menu);
         currentInventoryMap.put(uuid, inv);
         if (paginate) currentPageMap.put(uuid, 1);
 
-        this.inventory = inv;
-        this.contents();
+        inventory = inv;
+        contents();
 
         player.openInventory(inv);
     }
 
-    private void contents() {
-        config.getConfig().getConfigurationSection("contents").getKeys(false).forEach(key ->
-                itemUtils.slots(config, "contents." + key).forEach(slot -> {
-                    ItemStack item = itemUtils.addNBT(itemUtils.createItem(config, "contents." + key), "key", "contents." + key);
+    private static void contents() {
+        config.getConfigurationSection("contents").getKeys(false).forEach(key ->
+                slots(config, "contents." + key).forEach(slot -> {
+                    ItemStack item = addNBT(createItem("contents." + key), "key", "contents." + key);
                     inventory.setItem(slot, item);
                 }));
     }
