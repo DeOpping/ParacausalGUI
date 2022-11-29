@@ -1,5 +1,6 @@
 package dev.paracausal.gui;
 
+import dev.paracausal.gui.actions.Action;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -9,14 +10,17 @@ import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import static dev.paracausal.gui.Menu.openInventory;
+import static dev.paracausal.gui.Menu.*;
+import static dev.paracausal.gui.actions.Actions.actions;
 import static dev.paracausal.gui.utils.Utils.*;
 
 public class Commands {
 
     private static ArrayList<String> allCommands(FileConfiguration config, String path) {
-        return toList(config, path);
+        return toList(config, path + ".commands");
     }
 
 
@@ -42,6 +46,7 @@ public class Commands {
 
     public static void execute(FileConfiguration config, String path, ClickType clickType, Player player) {
         activeCommands(config, path, clickType).forEach(command -> {
+            UUID uuid = player.getUniqueId();
 
             boolean containsBroadcastTag = containsTag(command, "broadcast");
             boolean containsBcTag = containsTag(command, "bc");
@@ -82,6 +87,28 @@ public class Commands {
             String lower = command.toLowerCase();
 
 
+
+            //           Custom Actions           //
+            if (!actions.isEmpty()) {
+                boolean actionRan = false;
+
+                for (Map.Entry<String, Action> entry : actions.entrySet()) {
+                    String actionKey = entry.getKey();
+                    Action action = entry.getValue();
+
+                    if (lower.startsWith("[" + actionKey + "]")) {
+                        action.run();
+                        action.run(command);
+                        action.run(player);
+                        action.run(command, player);
+                        actionRan = true;
+                    }
+                }
+
+                if (actionRan) return;
+            }
+
+
             if (lower.startsWith("[broadcast]")) {
                 String msg = StringUtils.substringAfter(command, "]");
                 if (msg.startsWith(" ")) msg = msg.replaceFirst(" ", "");
@@ -103,7 +130,10 @@ public class Commands {
                 String menu = StringUtils.substringAfter(command, "]");
                 if (menu.startsWith(" ")) menu = menu.replaceFirst(" ", "");
                 if (menu.endsWith(".yml")) menu = menu.replace(".yml", "");
+
+                switchingMenuList.add(uuid);
                 openInventory(getMenuConfig(menu), menu, player);
+                switchingMenuList.remove(uuid);
                 return;
             }
 

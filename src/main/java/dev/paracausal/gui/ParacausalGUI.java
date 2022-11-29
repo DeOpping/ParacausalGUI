@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ParacausalGUI {
 
     private static JavaPlugin plugin;
+    private static String menuFolderPath;
 
     /**
      * Initialize the plugin!
@@ -29,10 +30,29 @@ public class ParacausalGUI {
     }
 
 
+    /**
+     * Set the location where your menus are stored!<br>
+     * Example of what to set the path to: getDataFolder() + File.separator + "menus"<br>
+     * This example would get menus from "plugins/(plugin)/menus/(menu.yml)"
+     * @param path String
+     */
+    public static void setMenuFolderPath(String path) {
+        menuFolderPath = path;
+    }
+
+
+    /**
+     * Get the menu folder path that was set!
+     * @return String
+     */
+    public static String getMenuFolderPath() {
+        return menuFolderPath;
+    }
+
+
     public static int serverVersion = 8;
     public static boolean placeholderApi = false;
     public static boolean headDatabase = false;
-    public static boolean advancedHeads = false;
 
     public static BukkitAudiences adventure = null;
 

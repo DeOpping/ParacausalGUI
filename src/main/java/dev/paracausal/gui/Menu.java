@@ -1,6 +1,8 @@
 package dev.paracausal.gui;
 
 import de.tr7zw.nbtapi.NBTItem;
+import dev.paracausal.gui.actions.Action;
+import dev.paracausal.gui.actions.Actions;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -14,6 +16,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -25,7 +28,9 @@ public class Menu implements Listener {
 
     public static HashMap<UUID, String> currentMenuMap = new HashMap<>();
     public static HashMap<UUID, Inventory> currentInventoryMap = new HashMap<>();
+    public static HashMap<UUID, ItemStack> currentClickedItem = new HashMap<>();
     public static HashMap<UUID, Integer> currentPageMap = new HashMap<>();
+    public static ArrayList<UUID> switchingMenuList = new ArrayList<>();
 
 
 
@@ -43,6 +48,7 @@ public class Menu implements Listener {
     @EventHandler
     private void onClose(InventoryCloseEvent e) {
         UUID uuid = e.getPlayer().getUniqueId();
+        if (switchingMenuList.contains(uuid)) return;
         currentMenuMap.remove(uuid);
         currentInventoryMap.remove(uuid);
         currentPageMap.remove(uuid);
@@ -82,7 +88,9 @@ public class Menu implements Listener {
         NBTItem nbt = new NBTItem(item);
         String path = nbt.getString("key");
 
+        currentClickedItem.put(uuid, item);
         execute(getMenuConfig(currentMenuMap.get(uuid)), path, clickType, player);
+        currentClickedItem.remove(uuid);
     }
 
 }

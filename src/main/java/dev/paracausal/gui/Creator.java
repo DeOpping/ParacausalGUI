@@ -22,6 +22,7 @@ public class Creator {
         boolean paginate = config.contains("paginated");
 
         UUID uuid = player.getUniqueId();
+
         currentMenuMap.put(uuid, menu);
         currentInventoryMap.put(uuid, inv);
         if (paginate) currentPageMap.put(uuid, 1);

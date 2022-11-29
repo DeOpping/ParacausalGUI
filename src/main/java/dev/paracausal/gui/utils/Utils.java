@@ -38,7 +38,7 @@ public class Utils {
 
     public static FileConfiguration getMenuConfig(String menu) {
         FileConfiguration cfg = null;
-        File cfgFile = new File(getPlugin().getDataFolder(), "menus" + File.separator + menu + ".yml");
+        File cfgFile = new File(getMenuFolderPath(), menu + ".yml");
         if (!cfgFile.exists()) return null;
 
         try { cfg = YamlConfiguration.loadConfiguration(cfgFile); }
@@ -114,7 +114,14 @@ public class Utils {
     }
 
     public static String removeTag(String input, String tag) {
-        return input.replace("{{" + tag + ":" + getTag(input, tag) + "}}", "");
+        String replace = "{{" + tag + ":" + getTag(input, tag) + "}}";
+
+        String result = input.replace(replace, "");
+
+        if (result.startsWith(" ")) result = result.replaceFirst(" ", "");
+        if (result.endsWith(" ")) result = StringUtils.removeEnd(result, " ");
+
+        return result;
     }
 
 }
