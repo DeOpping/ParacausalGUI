@@ -1,5 +1,6 @@
 package dev.paracausal.gui;
 
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ParacausalGUI {
@@ -12,6 +13,7 @@ public class ParacausalGUI {
      */
     public static void setPlugin(JavaPlugin plugin) {
         ParacausalGUI.plugin = plugin;
+        adventure = BukkitAudiences.create(plugin);
         new Menu();
         serverVersion = Integer.parseInt(plugin.getServer().getVersion().split("\\.")[1]);
         placeholderApi = plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
@@ -32,5 +34,6 @@ public class ParacausalGUI {
     public static boolean headDatabase = false;
     public static boolean advancedHeads = false;
 
+    public static BukkitAudiences adventure = null;
 
 }

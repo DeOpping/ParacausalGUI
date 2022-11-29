@@ -5,9 +5,12 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.md_5.bungee.api.ChatColor;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +35,17 @@ public class Utils {
         return new ArrayList<>(config.getConfigurationSection(path).getKeys(false));
     }
 
+
+    public static FileConfiguration getMenuConfig(String menu) {
+        FileConfiguration cfg = null;
+        File cfgFile = new File(getPlugin().getDataFolder(), "menus" + File.separator + menu + ".yml");
+        if (!cfgFile.exists()) return null;
+
+        try { cfg = YamlConfiguration.loadConfiguration(cfgFile); }
+        catch (IllegalArgumentException e) { e.printStackTrace(); }
+
+        return cfg;
+    }
 
 
     private static Object checkMiniMessage(String input, Player player) {
@@ -78,7 +92,7 @@ public class Utils {
     private static void send(Player player, String input) {
         Object message = checkMiniMessage(input, player);
         if (message instanceof Component) {
-            Audience audience = (Audience) player;
+            Audience audience = adventure.player(player);
             audience.sendMessage((Component) message);
         }
 
@@ -88,6 +102,19 @@ public class Utils {
     public static void sendMessage(Player player, String input) {
         if (input == null || input.length() == 0) return;
         send(player, input);
+    }
+
+
+    public static boolean containsTag(String input, String tag) {
+        return input.contains("{{" + tag + ":");
+    }
+
+    public static String getTag(String input, String tag) {
+        return StringUtils.substringBetween(input, "{{" + tag + ":", "}}");
+    }
+
+    public static String removeTag(String input, String tag) {
+        return input.replace("{{" + tag + ":" + getTag(input, tag) + "}}", "");
     }
 
 }

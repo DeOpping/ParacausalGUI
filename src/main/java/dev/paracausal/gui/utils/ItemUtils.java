@@ -26,15 +26,7 @@ import static dev.paracausal.gui.utils.Utils.toList;
 
 public class ItemUtils {
 
-    private static FileConfiguration config = null;
-    private static Player player = null;
-
-
-    public static void itemUtilsConfig(FileConfiguration config) { ItemUtils.config = config; }
-    public static void itemUtilsPlayer(Player player) { ItemUtils.player = player; }
-
-
-    public static ItemStack checkMaterial(String path) {
+    public static ItemStack checkMaterial(FileConfiguration config, String path) {
         String materialPath = path + ".material";
         String material = config.getString(materialPath);
         ItemStack item;
@@ -79,7 +71,7 @@ public class ItemUtils {
     }
 
 
-    public static ItemMeta addLore(ItemMeta meta, String path) {
+    public static ItemMeta addLore(FileConfiguration config, String path, ItemMeta meta, Player player) {
         List<String> formatted = new ArrayList<>();
         toList(config, path).forEach(string -> formatted.add(color(string, player)));
         meta.setLore(formatted);
@@ -87,7 +79,7 @@ public class ItemUtils {
     }
 
 
-    public static ItemMeta addEnchants(ItemMeta meta, String path) {
+    public static ItemMeta addEnchants(FileConfiguration config, String path, ItemMeta meta) {
         toList(config, path).forEach(string -> {
             String enchant = string;
             int level = 1;
@@ -111,7 +103,7 @@ public class ItemUtils {
         return meta;
     }
 
-    public static ItemMeta addItemFlags(ItemMeta meta, String path) {
+    public static ItemMeta addItemFlags(FileConfiguration config, String path, ItemMeta meta) {
         toList(config, path).forEach(string -> {
             ItemFlag flag;
             try { flag = ItemFlag.valueOf(string); }
@@ -124,28 +116,27 @@ public class ItemUtils {
     }
 
 
-    public static ItemStack createItem(String path) {
-        ItemStack item = checkMaterial(path);
+    public static ItemStack createItem(FileConfiguration config, String path, Player player) {
+        ItemStack item = checkMaterial(config, path);
         ItemMeta meta = item.getItemMeta();
 
         if (config.contains(path + ".name"))
             meta.setDisplayName(color(config.getString(path + ".name"), player));
 
         if (config.contains(path + ".lore"))
-            meta = addLore(meta, path + ".lore");
+            meta = addLore(config, path + ".lore", meta, player);
 
         if (config.contains(path + ".enchants"))
-            meta = addEnchants(meta, path + ".enchants");
+            meta = addEnchants(config, path + ".enchants", meta);
 
         if (config.contains(path + "item-flags"))
-            meta = addItemFlags(meta, path + "item-flags");
+            meta = addItemFlags(config, path + "item-flags", meta);
 
         if (serverVersion >= 14 && config.contains(path + ".model-data"))
             meta.setCustomModelData(config.getInt(path + ".model-data"));
 
-        item.setItemMeta(meta);
 
-        player = null;
+        item.setItemMeta(meta);
         return item;
     }
 

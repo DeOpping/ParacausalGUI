@@ -14,17 +14,7 @@ import static dev.paracausal.gui.utils.Utils.color;
 
 public class Creator {
 
-    private static FileConfiguration config;
-    private static String menu;
-    private static Inventory inventory;
-    private static Player player;
-
-
     public static void openInventory(FileConfiguration config, String menu, Player player) {
-        Creator.config = config;
-        Creator.menu = menu;
-        Creator.player = player;
-
         int rows = config.getInt("rows");
         String title = config.getString("title");
         Inventory inv = Bukkit.createInventory(null, rows*9, color(title, player));
@@ -36,16 +26,16 @@ public class Creator {
         currentInventoryMap.put(uuid, inv);
         if (paginate) currentPageMap.put(uuid, 1);
 
-        inventory = inv;
-        contents();
+        contents(config, inv, player);
 
         player.openInventory(inv);
     }
 
-    private static void contents() {
+
+    private static void contents(FileConfiguration config, Inventory inventory, Player player) {
         config.getConfigurationSection("contents").getKeys(false).forEach(key ->
                 slots(config, "contents." + key).forEach(slot -> {
-                    ItemStack item = addNBT(createItem("contents." + key), "key", "contents." + key);
+                    ItemStack item = addNBT(createItem(config, "contents." + key, player), "key", "contents." + key);
                     inventory.setItem(slot, item);
                 }));
     }

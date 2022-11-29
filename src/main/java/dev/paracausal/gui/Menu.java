@@ -19,8 +19,7 @@ import java.util.UUID;
 
 import static dev.paracausal.gui.Commands.*;
 import static dev.paracausal.gui.ParacausalGUI.getPlugin;
-import static dev.paracausal.gui.utils.ItemUtils.itemUtilsConfig;
-import static dev.paracausal.gui.utils.ItemUtils.itemUtilsPlayer;
+import static dev.paracausal.gui.utils.Utils.getMenuConfig;
 
 public class Menu implements Listener {
 
@@ -28,7 +27,6 @@ public class Menu implements Listener {
     public static HashMap<UUID, Inventory> currentInventoryMap = new HashMap<>();
     public static HashMap<UUID, Integer> currentPageMap = new HashMap<>();
 
-    private static FileConfiguration config;
 
 
     public Menu() {
@@ -37,9 +35,6 @@ public class Menu implements Listener {
 
 
     public static void openInventory(FileConfiguration config, String menu, Player player) {
-        Menu.config = config;
-        itemUtilsConfig(config);
-        itemUtilsPlayer(player);
         Creator.openInventory(config, menu, player);
     }
 
@@ -87,11 +82,7 @@ public class Menu implements Listener {
         NBTItem nbt = new NBTItem(item);
         String path = nbt.getString("key");
 
-        commandsConfig(config);
-        commandsPath(path);
-        commandsClickType(clickType);
-
-        execute(player);
+        execute(getMenuConfig(currentMenuMap.get(uuid)), path, clickType, player);
     }
 
 }
