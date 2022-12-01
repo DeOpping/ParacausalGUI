@@ -38,8 +38,15 @@ public class Utils {
 
     public static FileConfiguration getMenuConfig(String menu) {
         FileConfiguration cfg = null;
+
         File cfgFile = new File(getMenuFolderPath(), menu + ".yml");
-        if (!cfgFile.exists()) return null;
+        if (!cfgFile.exists()) {
+            if (menu.endsWith("-bedrock")) {
+                cfgFile = new File(getMenuFolderPath(), menu.replace("-bedrock", "") + ".yml");
+                if (!cfgFile.exists()) return null;
+            }
+            else return null;
+        }
 
         try { cfg = YamlConfiguration.loadConfiguration(cfgFile); }
         catch (IllegalArgumentException e) { e.printStackTrace(); }

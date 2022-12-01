@@ -7,6 +7,7 @@ public class ParacausalGUI {
 
     private static JavaPlugin plugin;
     private static String menuFolderPath;
+    private static String bedrockPrefix;
 
     /**
      * Initialize the plugin!
@@ -47,6 +48,23 @@ public class ParacausalGUI {
      */
     public static String getMenuFolderPath() {
         return menuFolderPath;
+    }
+
+
+    /**
+     * Set the prefix for your Bedrock players!
+     * @param prefix Bedrock username prefix
+     */
+    public static void setBedrockPrefix(String prefix) {
+        bedrockPrefix = prefix;
+    }
+
+    /**
+     * Get the bedrock player prefix you set!
+     * @return String
+     */
+    public static String getBedrockPrefix() {
+        return bedrockPrefix;
     }
 
 
